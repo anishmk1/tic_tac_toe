@@ -3,4 +3,5 @@ run:
 	./ttt.o
 
 clean:
-	rm *.o.*
+	rm *.o
+	rm -rf *.o.*

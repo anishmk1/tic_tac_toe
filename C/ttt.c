@@ -38,7 +38,8 @@ int main(){
 			getchar();
 		} while (make_move(input, 'x') < 0);
 		print_board();
-		if (check_win() != PLAY)
+		status = check_win();
+		if (status != PLAY)
 			break;
 
 		printf("::::::: COMP TURN :::::\n\n");
@@ -49,8 +50,27 @@ int main(){
 		status = check_win();
 	}
 
-}
+	switch (status) {
+		case DRAW:
+			printf("Draw game\n");
+			break;
+		
+		case PLAYER_WIN:
+			printf("Player win\n");
+			break;
 
+		case COMP_WIN:
+			printf("Comp win\n");
+			break;
+
+		default:
+			printf("default\n");
+			break;
+	}
+
+
+	printf("GAME OVER\n");
+}
 
 
 /// Em Sandeham Ledu
