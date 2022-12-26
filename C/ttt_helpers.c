@@ -1,4 +1,6 @@
-char board [3][3];
+#define SIZE 3
+
+char board [SIZE][SIZE];
 int num_moves;
 
 enum status {
@@ -8,19 +10,51 @@ enum status {
     PLAY = 3
 };
 
+/**
+
+            first state_t
+
+
+
+
+    MINIMAX TREE
+    for a given board state if move is player
+    then succ is all the possible comp moves that can come after
+    and vice versa
+*/
+typedef struct state_t {
+    char board[SIZE][SIZE];
+    int move;   // 0 -> player move | 1 -> comp ove
+    int heur;   // how favorable is this position for comp? more +ve is better
+                // probably number of comp wins/ player wins from a state
+    int wins;   // num of comp wins down this path
+    int non_wins;
+    struct state_t *succ; // array of state_t 
+} state_t;
+
 void init() {
     num_moves = 0;
-	for (int i = 0; i < 3; i++){
-		for (int j = 0; j < 3; j++) {
+	for (int i = 0; i < SIZE; i++){
+		for (int j = 0; j < SIZE; j++) {
 			board[i][j] = ' ';
 		}
 	}
 }
 
+// malloc and create deep copy of board
+void copy(char dest[SIZE][SIZE], char src[SIZE][SIZE]){
+    for (int i = 0; i < SIZE; i++){
+        for (int j = 0; j < SIZE; j++){
+            dest[i][j] = src[i][j];
+            
+        }
+    }
+}
+
 void print_board(){
 	printf("\n");
-	for (int i = 0; i < 3; i++){
-		for (int j = 0; j < 3; j++) {
+	for (int i = 0; i < SIZE; i++){
+		for (int j = 0; j < SIZE; j++) {
 			printf("[%c] ", board[i][j]);
 		}
 		printf("\n");
@@ -35,8 +69,8 @@ int make_move(int move, char token){
 	//	7 8 9
     if (move < 1 || move > 9)
         return -1;
-	int row = (move-1) / 3;
-	int col = (move-1) % 3;
+	int row = (move-1) / SIZE;
+	int col = (move-1) % SIZE;
     if (board[row][col] != ' ')
         return -1;
     board[row][col] = token;
@@ -44,13 +78,14 @@ int make_move(int move, char token){
 	return 0;
 }
 
+// TODO::: only works for SIZE 3
 // check for win condition
 int check_win() {
     if (num_moves == 9)
         return DRAW;
     int status;
 
-    for (int row = 0; row < 3; row++) {
+    for (int row = 0; row < SIZE; row++) {
         if (board[row][0] != ' ')
             if ((board[row][0] == board[row][1]) && (board[row][1] == board[row][2])) {
                 status = (board[row][0] == 'x') ? PLAYER_WIN : COMP_WIN;
@@ -58,7 +93,7 @@ int check_win() {
             }
     }
     // check vertical wins
-    for (int col = 0; col < 3; col++) {
+    for (int col = 0; col < SIZE; col++) {
         if (board[0][col] != ' ')
             if ((board[0][col] == board[1][col]) && (board[1][col] == board[2][col])){
                 status = (board[0][col] == 'x') ? PLAYER_WIN : COMP_WIN;
