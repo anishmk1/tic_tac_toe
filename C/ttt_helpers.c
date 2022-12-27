@@ -11,12 +11,6 @@ enum status {
 };
 
 /**
-
-            first state_t
-
-
-
-
     MINIMAX TREE
     for a given board state if move is player
     then succ is all the possible comp moves that can come after
@@ -29,6 +23,7 @@ typedef struct state_t {
                 // probably number of comp wins/ player wins from a state
     int wins;   // num of comp wins down this path
     int non_wins;
+    int losses;
     struct state_t *succ; // array of state_t 
 } state_t;
 
@@ -80,38 +75,38 @@ int make_move(int move, char token){
 
 // TODO::: only works for SIZE 3
 // check for win condition
-int check_win() {
+int check_win(char curr_board[SIZE][SIZE]) {
     if (num_moves == 9)
         return DRAW;
     int status;
 
     for (int row = 0; row < SIZE; row++) {
-        if (board[row][0] != ' ')
-            if ((board[row][0] == board[row][1]) && (board[row][1] == board[row][2])) {
-                status = (board[row][0] == 'x') ? PLAYER_WIN : COMP_WIN;
+        if (curr_board[row][0] != ' ')
+            if ((curr_board[row][0] == curr_board[row][1]) && (curr_board[row][1] == curr_board[row][2])) {
+                status = (curr_board[row][0] == 'x') ? PLAYER_WIN : COMP_WIN;
                 return status;
             }
     }
     // check vertical wins
     for (int col = 0; col < SIZE; col++) {
-        if (board[0][col] != ' ')
-            if ((board[0][col] == board[1][col]) && (board[1][col] == board[2][col])){
-                status = (board[0][col] == 'x') ? PLAYER_WIN : COMP_WIN;
+        if (curr_board[0][col] != ' ')
+            if ((curr_board[0][col] == curr_board[1][col]) && (curr_board[1][col] == curr_board[2][col])){
+                status = (curr_board[0][col] == 'x') ? PLAYER_WIN : COMP_WIN;
                 return status;
             }
                 
     }
     // check /
-    if (board[2][0] != ' '){
-        if ((board[2][0] == board[1][1] && board[1][1] == board[0][2])){
-            status = (board[2][0] == 'x') ? PLAYER_WIN : COMP_WIN;
+    if (curr_board[2][0] != ' '){
+        if ((curr_board[2][0] == curr_board[1][1] && curr_board[1][1] == curr_board[0][2])){
+            status = (curr_board[2][0] == 'x') ? PLAYER_WIN : COMP_WIN;
             return status;
         }
     }
     // check backslash
-    if (board[0][0] != ' '){
-        if ((board[0][0] == board[1][1] && board[1][1] == board[2][2])){
-            status = (board[0][0] == 'x') ? PLAYER_WIN : COMP_WIN;
+    if (curr_board[0][0] != ' '){
+        if ((curr_board[0][0] == curr_board[1][1] && curr_board[1][1] == curr_board[2][2])){
+            status = (curr_board[0][0] == 'x') ? PLAYER_WIN : COMP_WIN;
             return status;
         }
     }

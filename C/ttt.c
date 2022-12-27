@@ -10,32 +10,25 @@
 	use an array of states.
 */
 
-// // get all succ states at a given depth
-// state_t* succ(state_t *curr_state, int depth) {
-// 	// given the board state with just one move played -- player
-// 	int num_succs = SIZE - num_moves;
-// 	ret_succs = malloc(sizeof(state_t) * num_succs);
-// 	for (int i = 0; i < num_succs; i++){
-// 		succ_helper(ret_succs->succ[i]);
-// 	}
-// }
-
-// // recursive helper to get successor states
-// // return number of comp wins
-// int succ_helper(state_t *curr_state) {
-
 // }
 // gets st having just made a comp move
 // keep track of depth
 // when 
 int get_heur(state_t *st, int depth) {
-	if (depth == 2) {
-		for (int i = 0; i < 9; i++){
-			printf("[%c] ",st->board[i/3][i%3]);
+	st->wins = 0;
+	st->non_wins = 0;
+	if (depth == 9) {
+		// for (int i = 0; i < 9; i++){
+		// 	printf("[%c] ",st->board[i/3][i%3]);
+		// }
+		// printf("\n");
+		if (check_win(st->board) == PLAYER_WIN) {
+			st->wins = 1;
+		} else {
+			st->non_wins = 1;
 		}
-		printf("\n");
+		return st->wins;
 	}
-	int st_wins, st_non_wins = 0;	
 	// loop through sst->board
 	for (int i = 0; i < SIZE; i++) {
 		for (int j = 0; j < SIZE; j++) {
@@ -45,6 +38,10 @@ int get_heur(state_t *st, int depth) {
 				state_t player_st;
 				copy(player_st.board, st->board);
 				player_st.board[i][j] = 'x';
+				if (check_win(player_st.board) == COMP_WIN) {
+					st->losses = 1;
+					return 0;
+				}
 
 				// AGAIN LOOP THROUGH ADDING 'o' WHEREVER POSSIBLE
 				// RECURSIVELY RETURN NUMBER OF WINS/NON_WINS
@@ -53,9 +50,15 @@ int get_heur(state_t *st, int depth) {
 						if (player_st.board[k][l] == ' ') {
 							// place a 'o' here and get_heur
 							state_t comp_st;
+							comp_st.wins = 0;
+							comp_st.non_wins = 0;
 							copy(comp_st.board, player_st.board);
 							comp_st.board[k][l] = 'o';
 							get_heur(&comp_st, depth + 1);
+
+							// propagate wins
+							st->wins += comp_st.wins;
+							st->non_wins += comp_st.non_wins;
 						}
 					}
 				}
@@ -63,14 +66,11 @@ int get_heur(state_t *st, int depth) {
 		}
 	}
 
-	st->wins = st_wins;
-	st->non_wins = st_non_wins;
-
 	// for each possible player move --> new player state
 	// get number of comp wins for this state
 
 
-	return 1;
+	return st->wins/ st->non_wins;
 }
 
 
@@ -97,15 +97,22 @@ int ai() {
 				// for (int i = 0; i < 9; i++)
 				// 	printf("[%c] ", st.board[i/3][i%3]);
 				// printf("\n");
-				int heur = get_heur(&st, 0);		// should fill in heur field
+				get_heur(&st, num_moves);		// should fill in heur field
+				if (st.losses == 1) {
+					printf("losing??\n");
+					continue;
+				}
+				int heur = st.wins / st.non_wins;
 				if (heur >= max_heur) {
 					max_heur = heur;
 					comp_move = 3*i + j + 1;
 				}
+				printf("[%d][%d] -- st wins: %d, st non_wins: %d, st losses: %d\n", i, j, st.wins, st.non_wins, st.losses);
 			}
 		}
 	}
 	// pseudo random response
+	printf("comp move: %d\n", comp_move);
 	return comp_move;
 }
 
@@ -126,7 +133,7 @@ int main(){
 			getchar();
 		} while (make_move(input, 'x') < 0);
 		print_board();
-		status = check_win();
+		status = check_win(board);
 		if (status != PLAY)
 			break;
 
@@ -135,7 +142,7 @@ int main(){
 		make_move(comp_move, 'o');
 		print_board();
 
-		status = check_win();
+		status = check_win(board);
 	}
 
 	switch (status) {
